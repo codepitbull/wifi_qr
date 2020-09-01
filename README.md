@@ -1,4 +1,5 @@
 # Building with Vagrant
+
 Run ```vagrant up``` to get a dev envrionment.
 
 Log into vagrant via ```vagrant ssh```.
