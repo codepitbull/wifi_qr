@@ -1,4 +1,4 @@
-# Building
+# Building with Vagrant
 Run ```vagrant up``` to get a dev envrionment.
 
 Log into vagrant via ```vagrant ssh```.
@@ -10,7 +10,13 @@ Build using cross ```cross build --target=armv7-unknown-linux-musleabihf```
 The resulting file can be copied to your OpenWrt (Linksys WRT1900ACS-EU in my case).
 
 
-# uhttpd
+# Build locally
+
+```cargo install cross```
+```cross build --target=armv7-unknown-linux-musleabihf```
+
+# install
+Install 
 
 ```
 config 'uhttpd' 'qr'
@@ -21,3 +27,7 @@ config 'uhttpd' 'qr'
 /etc/init.d/uhttpd restart
 
 /target/armv7-unknown-linux-musleabihf/debug/wifi_qr
+
+wifi down radio1
+wifi up radio1
+wifi reload radio1

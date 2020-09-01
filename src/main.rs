@@ -52,15 +52,15 @@ fn main() {
     let iface_id = &args[1].parse::<u32>().unwrap();
     let target_path = &args[2];
 
-    if args.len() == 3 {
-        set_key(iface_id);
-    }
+    set_key(iface_id);
 
     let key = get_key(iface_id);
     let ssid = get_ssid(iface_id);
 
-    let qr = QrCode::encode_text(format!("WIFI:T:WPA;S:{};P:{};;",ssid,key).as_str(),
-                                 QrCodeEcc::Medium).unwrap();
+    let string_to_encode = format!("WIFI:S:{};T:WPA;P:{};;", ssid, key);
+    println!("Encoded: ({})", string_to_encode.to_string());
+    let qr = QrCode::encode_text(format!("WIFI:S:{};T:WPA;P:{};;",ssid,key).as_str(),
+                                 QrCodeEcc::High).unwrap();
     let svg = qr.to_svg_string(4);
 
     let now = Utc::now();
@@ -85,23 +85,23 @@ fn get_key(iface_id: &u32) -> String {
         .output()
         .expect("failed to get key");
 
-    return String::from_utf8_lossy(&output.stdout).to_string();
+    let mut key = String::from_utf8_lossy(&output.stdout).to_string();
+    let len = key.len();
+    key.truncate(len - 1);
+    return key;
 }
 
-fn set_key(iface_id: &u32) -> String {
+fn set_key(iface_id: &u32) {
     let password: String = thread_rng()
         .sample_iter(&Alphanumeric)
-        .take(30)
+        .take(16)
         .collect();
 
-    let output = Command::new("/sbin/uci")
+    Command::new("/sbin/uci")
         .arg("set")
-        .arg(format!("wireless.@wifi-iface[{}].key", iface_id))
-        .arg(password)
+        .arg(format!("wireless.@wifi-iface[{}].key={}", iface_id, password))
         .output()
         .expect("failed to set key");
-
-    return String::from_utf8_lossy(&output.stdout).to_string();
 }
 
 fn get_ssid(iface_id: &u32) -> String {
@@ -110,6 +110,8 @@ fn get_ssid(iface_id: &u32) -> String {
         .arg(format!("wireless.@wifi-iface[{}].ssid", iface_id))
         .output()
         .expect("failed to get ssid");
-
-    return String::from_utf8_lossy(&output.stdout).to_string();
+    let mut ssid = String::from_utf8_lossy(&output.stdout).to_string();
+    let len = ssid.len();
+    ssid.truncate(len - 1);
+    return ssid;
 }
